@@ -30,7 +30,7 @@ const db = admin.firestore();
 app.get('/cat/:keyword', (req, res) => {
     (async () => {
         try {
-            let query = db.collection('recommendation');
+            let query = db.collection('recommendation').where('cat', 'in', [req.params.keyword, "random"]);
             let response = [];
             await query.get().then(querySnapshot => {
             let docs = querySnapshot.docs;
@@ -41,6 +41,7 @@ app.get('/cat/:keyword', (req, res) => {
                 };
                 response.push(selectedItem);
             }
+            return null;
             });
             return res.status(200).send(response);
         } catch (error) {
