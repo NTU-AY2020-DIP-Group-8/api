@@ -29,21 +29,23 @@ app.get("/cat/:keyword", (req, res) => {
   (async () => {
     try {
       var keyword = req.params.keyword.toLowerCase();
-      if (keyword.includes("health")){
+      if (keyword.includes("health")) {
         keyword = "health";
-      } else if (keyword.includes("knowledge") || keyword.includes("study")){
+      } else if (keyword.includes("knowledge") || keyword.includes("study")) {
         keyword = "study";
-      } else if (keyword.includes("personal")){
+      } else if (keyword.includes("personal")) {
         keyword = "personal";
       }
-      let query = db
-        .collection("recommendation")
-        .where("cat", "==", keyword);
-      let response = [];
-      const snapshoot = await query.get();
-      if (snapshoot.empty) {
-        query = db.collection("recommendation").where("cat", "==", "random");
+      else {
+        keyword = "random";
       }
+      let query = db.collection("recommendation").where("cat", "==", keyword);
+      let response = [];
+      let result = [];
+      const snapshoot = await query.get();
+      // if (snapshoot.empty) {
+      //   query = db.collection("recommendation").where("cat", "==", "random");
+      // }
 
       await query.get().then((querySnapshot) => {
         let docs = querySnapshot.docs;
@@ -56,8 +58,19 @@ app.get("/cat/:keyword", (req, res) => {
         }
         return null;
       });
+      get_random = function (list) {
+        return list[Math.floor(Math.random() * list.length)];
+      };
 
-      return res.status(200).send(response);
+      for (i = 0; i < 3; i++) {
+        var temp = get_random(response);
+        result.push(temp);
+        response = response.filter(function (e) {
+          return e !== temp;
+        });
+      }
+
+      return res.status(200).send(result);
     } catch (error) {
       console.log(error);
       return res.status(500).send(error);
